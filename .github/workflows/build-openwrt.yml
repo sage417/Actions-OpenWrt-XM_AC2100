@@ -62,6 +62,14 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: Cache build
+      uses: klever1988/cachewrtbuild@main
+      with:
+        ccache: true
+        clean: ${{ contains(github.event.action, 'nocache') }}
+        mixkey: ''
+        prefix: 'openwrt'
+
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -98,14 +106,6 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
-    - name: Compile the firmware
-      uses: klever1988/cachewrtbuild@main
-      with:
-        ccache: true
-        clean: ${{ contains(github.event.action, 'nocache') }}
-        mixkey: ''
-        prefix: 'openwrt'
 
     - name: Compile the firmware
       id: compile
